@@ -669,6 +669,10 @@ void co_swap(stCoRoutine_t* curr, stCoRoutine_t* pending_co)
 		}
 	}
 
+	co_log_err("===Before co swap, the num of call stack is: %d.\n", env->iCallStackSize);
+	co_log_err("===Before co swap, it will switch curr_co:[%p]->func:[%p] to pending_co:[%p]->func:[%p].\n",
+			curr, curr->pfn, pending_co, pending_co->pfn);
+
 	//swap context
 	coctx_swap(&(curr->ctx),&(pending_co->ctx) );
 
@@ -679,6 +683,8 @@ void co_swap(stCoRoutine_t* curr, stCoRoutine_t* pending_co)
 	
 	if (update_occupy_co && update_pending_co && update_occupy_co != update_pending_co)
 	{
+		co_log_err("===After co swap, update occupy_co:[%p]->func:[%p], pending_co:[%p]->func:[%p].\n",
+				   update_occupy_co, update_occupy_co->pfn, update_occupy_co, update_occupy_co->pfn);
 		//resume stack buffer
 		if (update_pending_co->save_buffer && update_pending_co->save_size > 0)
 		{
