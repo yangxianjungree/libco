@@ -29,7 +29,7 @@
 #include <poll.h>
 #include <sys/time.h>
 #include <errno.h>
-
+#include <cstdarg>
 #include <assert.h>
 
 #include <fcntl.h>
@@ -59,10 +59,6 @@ struct stCoRoutineEnv_t
 	stCoRoutine_t* occupy_co;
 };
 //int socket(int domain, int type, int protocol);
-void co_log_err( const char *fmt,... )
-{
-}
-
 
 #if defined( __LIBCO_RDTSCP__) 
 static unsigned long long counter(void)
@@ -111,6 +107,19 @@ static unsigned long long GetTickMS()
 	u *= 1000;
 	u += now.tv_usec / 1000;
 	return u;
+#endif
+}
+
+void co_log_err( const char *fmt,... )
+{
+#ifdef DEBUG
+	va_list var;
+	va_start(var, fmt);
+	char buf[2048];
+	int n = sprintf(buf, "pid:[%d] thread:[%ld] time[%lld] ", getpid(), pthread_self(), GetTickMS());
+	vsprintf(buf + n, fmt, var);
+	syscall(__NR_write, STDOUT_FILENO, buf, strlen(buf));
+	va_end(var);
 #endif
 }
 
